@@ -64,17 +64,17 @@ router.get('/:id', (req, res) => {
             }
         ]
     })
-        .then(dbPostData => {
-            if (!dbPostData) {
-                res.status(400).json({ message: 'No post found with this id' });
-                return;
-            }
-            res.json(dbPostData);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+    .then(dbPostData => {
+        if (!dbPostData) {
+            res.status(400).json({ message: 'No post found with this id' });
+            return;
+        }
+        res.json(dbPostData);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
 })
 
 router.post('/', (req, res) => {
@@ -94,12 +94,14 @@ router.post('/', (req, res) => {
 // PUT /api/posts/upvote
 router.put('/upvote', (req, res) => {
     // custom static method created in models/Post.js
-    Post.upvote(req.body, { Vote })
-        .then(updatedPostData => res.json(updatedPostData))
+    if (req.session) {
+        Post.upvote({ ...req.body, user_id: req.session.user_id }, { Vote, Comment, User })
+        .then(updatedVoteData => res.json(updatedVoteData))
         .catch(err => {
             console.log(err);
-            res.status(400).json(err);
+            res.status(500).json(err);
         });
+    }
 });
 
 router.put('/:id', (req, res) => {
